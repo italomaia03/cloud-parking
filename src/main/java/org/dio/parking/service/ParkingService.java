@@ -1,5 +1,6 @@
 package org.dio.parking.service;
 
+import org.dio.parking.exception.ParkingNotFoundException;
 import org.dio.parking.model.Parking;
 import org.springframework.stereotype.Service;
 
@@ -10,15 +11,7 @@ import java.util.stream.Collectors;
 @Service
 public class ParkingService {
     private static Map<String, Parking> parkingMap = new HashMap<>();
-
-    static {
-        String id = getUUID();
-        String id1 = getUUID();
-        Parking parking = new Parking(id, "HVK-1260", "CE", "PALIO", "VERMELHO");
-        Parking parking1 = new Parking(id1, "POQ-2429", "PB", "FUSCA", "BRANCO");
-        parkingMap.put(id, parking);
-        parkingMap.put(id1, parking1);
-    }
+    
 
     public List<Parking> findAll(){
         return new ArrayList<>(parkingMap.values());
@@ -31,7 +24,11 @@ public class ParkingService {
 
 
     public Parking findById(String id) {
-        return parkingMap.get(id);
+        Parking parking = parkingMap.get(id);
+        if(parking == null){
+            throw new ParkingNotFoundException(id);
+        }
+        return parking;
     }
 
     public Parking create(Parking parkingCreate) {
@@ -40,5 +37,27 @@ public class ParkingService {
         parkingCreate.setEntryDate(LocalDateTime.now());
         parkingMap.put(id, parkingCreate);
         return parkingCreate;
+    }
+
+    public void delete(String id) {
+        findById(id);
+        parkingMap.remove(id);
+    }
+
+    public Parking update(String id, Parking parkingUpdate) {
+        Parking parking = findById(id);
+        parking.setColor(parkingUpdate.getColor());
+        parkingMap.replace(id, parking);
+        return parking;
+    }
+
+    public Parking exit(String id) {
+        Parking parking = findById(id);
+        parking.setExitDate(LocalDateTime.now());
+        Double bill = (parking.getExitDate().getHour() - parking.getEntryDate().getHour()) * 7.00;
+        parking.setBill(bill);
+        parkingMap.replace(id, parking);
+
+        return parking;
     }
 }
