@@ -14,7 +14,7 @@ import org.springframework.http.MediaType;
 
 //boa prática para não usar a porta 80 durante os testes de integração
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ParkingControllerTest {
+class ParkingControllerTest extends AbstractContainerBase{
 
     @LocalServerPort
     private int randomPort;
